@@ -1,6 +1,6 @@
 resource "openfaas_function" "function_test" {
   name      = "test-function"
-  image     = "functions/alpine:latest"
+  image     = "alpine:latest"
   f_process = "env"
   labels = {
     Group       = "London"

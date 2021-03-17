@@ -3,9 +3,8 @@ package openfaas
 import (
 	"context"
 	"fmt"
-	"strings"
-
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -21,27 +20,27 @@ func resourceOpenFaaSFunction() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"image": &schema.Schema{
+			"image": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"network": &schema.Schema{
+			"network": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"f_process": &schema.Schema{
+			"f_process": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"env_vars": &schema.Schema{
+			"env_vars": {
 				Type:     schema.TypeMap,
 				Optional: true,
 			},
-			"registry_auth": &schema.Schema{
+			"registry_auth": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -57,50 +56,51 @@ func resourceOpenFaaSFunction() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
-			"labels": &schema.Schema{
+			"labels": {
 				Type:             schema.TypeMap,
 				Optional:         true,
 				DiffSuppressFunc: labelsDiffFunc,
 			},
-			"annotations": &schema.Schema{
-				Type:     schema.TypeMap,
-				Optional: true,
+			"annotations": {
+				Type:             schema.TypeMap,
+				Optional:         true,
+				DiffSuppressFunc: annotationsDiffFunc,
 			},
-			"limits": &schema.Schema{
+			"limits": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"memory": &schema.Schema{
+						"memory": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"cpu": &schema.Schema{
+						"cpu": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
 					},
 				},
 			},
-			"requests": &schema.Schema{
+			"requests": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"memory": &schema.Schema{
+						"memory": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"cpu": &schema.Schema{
+						"cpu": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
 					},
 				},
 			},
-			"read_only_root_file_system": &schema.Schema{
+			"read_only_root_file_system": {
 				Type:     schema.TypeMap,
 				Optional: true,
 			},
@@ -165,20 +165,34 @@ func isFunctionNotFound(err error) bool {
 		strings.Contains(err.Error(), "No such function")
 }
 
-var whiteListLabels = map[string]string{
-	"labels.com.openfaas.function": "",
-	"labels.function":              "",
-	"labels.uid":                   "",
+var defaultLabels = map[string]struct{}{
+	"labels.faas_function": {},
+	"labels.function":      {},
+	"labels.uid":           {},
+}
+
+var defaultAnnotations = map[string]struct{}{
+	"annotations.prometheus.io.scrape": {},
 }
 
 const extraProviderLabelsCount = 3
 
 func labelsDiffFunc(k, old, new string, d *schema.ResourceData) bool {
-	if _, ok := whiteListLabels[k]; ok {
+	return defaultFieldsDiffFunc(k, old, new, defaultLabels)
+}
+
+func annotationsDiffFunc(k, old, new string, d *schema.ResourceData) bool {
+	return defaultFieldsDiffFunc(k, old, new, defaultAnnotations)
+}
+
+func defaultFieldsDiffFunc(k, old, new string, defaults map[string]struct{}) bool {
+	if _, ok := defaults[k]; ok {
+		if new != "" {
+			return old == new
+		}
 		return true
 	}
 
-	// TODO: call proxy.Versions, when it's merged and only do this is the provider is faas-swarm
 	o, err := strconv.Atoi(old)
 	if err != nil {
 		return old == new
@@ -187,9 +201,6 @@ func labelsDiffFunc(k, old, new string, d *schema.ResourceData) bool {
 	n, err := strconv.Atoi(new)
 	if err != nil {
 		return old == new
-	}
-	if o > 0 {
-		o = o - extraProviderLabelsCount
 	}
 
 	return o == n

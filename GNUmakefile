@@ -2,7 +2,6 @@ SWEEP?=us-east-1,us-west-2
 TEST?=./...
 GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 PKG_NAME=openfaas
-WEBSITE_REPO=github.com/ewilde/terraform-website
 
 default: build
 
@@ -57,28 +56,5 @@ test-compile:
 	fi
 	go test -c $(TEST) $(TESTARGS)
 
-website:
-ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
-	echo "$(WEBSITE_REPO) not found in your GOPATH (necessary for layouts and assets), get-ting..."
-	git clone https://$(WEBSITE_REPO) $(GOPATH)/src/$(WEBSITE_REPO)
-endif
-	@echo $(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
-	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
-
-website-build:
-ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
-	echo "$(WEBSITE_REPO) not found in your GOPATH (necessary for layouts and assets), get-ting..."
-	git clone https://$(WEBSITE_REPO) $(GOPATH)/src/$(WEBSITE_REPO)
-endif
-	@echo $(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-build PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
-	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-build PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
-
-website-test:
-ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
-	echo "$(WEBSITE_REPO) not found in your GOPATH (necessary for layouts and assets), get-ting..."
-	git clone https://$(WEBSITE_REPO) $(GOPATH)/src/$(WEBSITE_REPO)
-endif
-	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-test PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
-
-.PHONY: build sweep test testacc vet fmt fmtcheck errcheck vendor-status test-compile website website-build website-test goimports travisbuild release release-deps
+.PHONY: build sweep test testacc vet fmt fmtcheck errcheck vendor-status test-compile goimports travisbuild release release-deps
 
