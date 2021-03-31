@@ -1,6 +1,3 @@
-// Copyright (c) OpenFaaS Author(s) 2017. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
 package proxy
 
 import (
@@ -9,40 +6,66 @@ import (
 	"github.com/openfaas/faas-cli/config"
 )
 
-//SetAuth sets basic auth for the given gateway
-func SetAuth(req *http.Request, gateway string) {
-	authConfig, err := config.LookupAuthConfig(gateway)
-	if err != nil {
-		// no auth info found
-		return
-	}
-
-	switch authConfig.Auth {
-	case config.BasicAuthType:
-		SetBasicAuth(req, authConfig)
-		return
-	case config.Oauth2AuthType:
-		SetOauth2(req, authConfig)
-		return
-	}
+//CLIAuth auth struct for the CLI
+type CLIAuth struct {
+	Username string
+	Password string
+	Token    string
 }
 
-//SetToken sets authentication token
-func SetToken(req *http.Request, token string) {
-	req.Header.Set("Authorization", "Bearer "+token)
+//BasicAuth basic authentication type
+type BasicAuth struct {
+	username string
+	password string
 }
 
-//SetBasicAuth set basic authentication
-func SetBasicAuth(req *http.Request, authConfig config.AuthConfig) {
-	username, password, err := config.DecodeAuth(authConfig.Token)
-	if err != nil {
-		// no auth info found
-		return
+func (auth *BasicAuth) Set(req *http.Request) error {
+	req.SetBasicAuth(auth.username, auth.password)
+	return nil
+}
+
+//BearerToken bearer token
+type BearerToken struct {
+	token string
+}
+
+func (c *BearerToken) Set(req *http.Request) error {
+	req.Header.Set("Authorization", "Bearer "+c.token)
+	return nil
+}
+
+//NewCLIAuth returns a new CLI Auth
+func NewCLIAuth(token string, gateway string) (ClientAuth, error) {
+	authConfig, _ := config.LookupAuthConfig(gateway)
+
+	var (
+		username    string
+		password    string
+		bearerToken string
+		err         error
+	)
+
+	if authConfig.Auth == config.BasicAuthType {
+		username, password, err = config.DecodeAuth(authConfig.Token)
+		if err != nil {
+			return nil, err
+		}
+
+		return &BasicAuth{
+			username: username,
+			password: password,
+		}, nil
+
 	}
-	req.SetBasicAuth(username, password)
-}
 
-//SetOauth2 set oauth2 token
-func SetOauth2(req *http.Request, authConfig config.AuthConfig) {
-	SetToken(req, authConfig.Token)
+	// User specified token gets priority
+	if len(token) > 0 {
+		bearerToken = token
+	} else {
+		bearerToken = authConfig.Token
+	}
+
+	return &BearerToken{
+		token: bearerToken,
+	}, nil
 }

@@ -16,22 +16,22 @@ func dataSourceOpenFaaSFunction() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"image": &schema.Schema{
+			"image": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"f_process": &schema.Schema{
+			"f_process": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"labels": &schema.Schema{
+			"labels": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Computed: true,
 			},
-			"annotations": &schema.Schema{
+			"annotations": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Computed: true,

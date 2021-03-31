@@ -18,11 +18,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var (
-	DefaultDir  = "~/.openfaas"
-	DefaultFile = "config.yml"
-)
-
 //AuthType auth type
 type AuthType string
 
@@ -31,6 +26,22 @@ const (
 	BasicAuthType = "basic"
 	//Oauth2AuthType oauth2 authentication type
 	Oauth2AuthType = "oauth2"
+
+	// ConfigLocationEnv is the name of he env variable used
+	// to configure the location of the faas-cli config folder.
+	// When not set, DefaultDir location is used.
+	ConfigLocationEnv string = "OPENFAAS_CONFIG"
+
+	DefaultDir         string      = "~/.openfaas"
+	DefaultFile        string      = "config.yml"
+	DefaultPermissions os.FileMode = 0700
+
+	// DefaultCIDir creates the 'openfaas' directory in the current directory
+	// if running in a CI environment.
+	DefaultCIDir string = ".openfaas"
+	// DefaultCIPermissions creates the config file with elevated permissions
+	// for it to be read by multiple users when running in a CI environment.
+	DefaultCIPermissions os.FileMode = 0744
 )
 
 // ConfigFile for OpenFaaS CLI exclusively.
@@ -58,15 +69,52 @@ func New(filePath string) (*ConfigFile, error) {
 	return conf, nil
 }
 
+// ConfigDir returns the path to the faas-cli config directory.
+// When
+// 1. CI = "true" and OPENFAAS_CONFIG="", then it will return `.openfaas`, which is located in the current working directory.
+// 2. CI = "true" and OPENFAAS_CONFIG="<path>", then it will return the path value in  OPENFAAS_CONFIG
+// 3. CI = "" and OPENFAAS_CONFIG="", then it will return the default location ~/.openfaas
+func ConfigDir() string {
+	override := os.Getenv(ConfigLocationEnv)
+	ci := isRunningInCI()
+
+	switch {
+	// case (1) from docs string
+	case ci && override == "":
+		return DefaultCIDir
+	// case (2) from the doc string
+	case override != "":
+		// case (3) from the doc string
+		return override
+	default:
+		return DefaultDir
+	}
+}
+
+// isRunningInCI checks the ENV var CI and returns true if it's set to true or 1
+func isRunningInCI() bool {
+	if env, ok := os.LookupEnv("CI"); ok {
+		if env == "true" || env == "1" {
+			return true
+		}
+	}
+	return false
+}
+
 // EnsureFile creates the root dir and config file
 func EnsureFile() (string, error) {
-	dirPath, err := homedir.Expand(DefaultDir)
+	permission := DefaultPermissions
+	dir := ConfigDir()
+	if isRunningInCI() {
+		permission = DefaultCIPermissions
+	}
+	dirPath, err := homedir.Expand(dir)
 	if err != nil {
 		return "", err
 	}
 
 	filePath := path.Clean(filepath.Join(dirPath, DefaultFile))
-	if err := os.MkdirAll(filepath.Dir(filePath), 0700); err != nil {
+	if err := os.MkdirAll(filepath.Dir(filePath), permission); err != nil {
 		return "", err
 	}
 
@@ -83,7 +131,8 @@ func EnsureFile() (string, error) {
 
 // FileExists returns true if the config file is located at the default path
 func fileExists() bool {
-	dirPath, err := homedir.Expand(DefaultDir)
+	dir := ConfigDir()
+	dirPath, err := homedir.Expand(dir)
 	if err != nil {
 		return false
 	}

@@ -36,9 +36,6 @@ func (t typeImplSigil) isTypeImpl() typeImplSigil {
 // Equals returns true if the other given Type exactly equals the receiver
 // type.
 func (t Type) Equals(other Type) bool {
-	if t == NilType || other == NilType {
-		return t == other
-	}
 	return t.typeImpl.Equals(other)
 }
 
@@ -90,7 +87,7 @@ func (t Type) HasDynamicTypes() bool {
 	case t.IsPrimitiveType():
 		return false
 	case t.IsCollectionType():
-		return t.ElementType().HasDynamicTypes()
+		return false
 	case t.IsObjectType():
 		attrTypes := t.AttributeTypes()
 		for _, at := range attrTypes {

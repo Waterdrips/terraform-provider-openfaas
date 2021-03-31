@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/ewilde/terraform-provider-openfaas/openfaas"
 	"github.com/hashicorp/terraform-plugin-sdk/plugin"
+	"github.com/openfaas/terraform-provider-openfaas/openfaas"
 )
 
 func main() {

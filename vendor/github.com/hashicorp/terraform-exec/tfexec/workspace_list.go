@@ -14,7 +14,7 @@ func (tf *Terraform) WorkspaceList(ctx context.Context) ([]string, string, error
 	var outBuf bytes.Buffer
 	wlCmd.Stdout = &outBuf
 
-	err := tf.runTerraformCmd(ctx, wlCmd)
+	err := tf.runTerraformCmd(wlCmd)
 	if err != nil {
 		return nil, "", err
 	}

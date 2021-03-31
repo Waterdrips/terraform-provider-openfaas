@@ -2,10 +2,13 @@ package proxy
 
 import (
 	"context"
+	"fmt"
 	"io"
-	"log"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
+	"os"
+	gopath "path"
 	"strings"
 	"time"
 )
@@ -28,11 +31,11 @@ type ClientAuth interface {
 }
 
 //NewClient initializes a new API client
-func NewClient(auth ClientAuth, gatewayURL string, transport http.RoundTripper, timeout *time.Duration) *Client {
+func NewClient(auth ClientAuth, gatewayURL string, transport http.RoundTripper, timeout *time.Duration) (*Client, error) {
 	gatewayURL = strings.TrimRight(gatewayURL, "/")
 	baseURL, err := url.Parse(gatewayURL)
 	if err != nil {
-		log.Fatalf("invalid gateway URL: %s", gatewayURL)
+		return nil, fmt.Errorf("invalid gateway URL: %s", gatewayURL)
 	}
 
 	client := &http.Client{}
@@ -48,7 +51,7 @@ func NewClient(auth ClientAuth, gatewayURL string, transport http.RoundTripper, 
 		ClientAuth: auth,
 		httpClient: client,
 		GatewayURL: baseURL,
-	}
+	}, nil
 }
 
 //newRequest create a new HTTP request with authentication
@@ -57,10 +60,16 @@ func (c *Client) newRequest(method, path string, body io.Reader) (*http.Request,
 	if err != nil {
 		return nil, err
 	}
-	rel := &url.URL{Path: u.Path, RawQuery: u.RawQuery}
-	url := c.GatewayURL.ResolveReference(rel)
+	// deep copy gateway url and then add the supplied path  and args to the copy so that
+	// we preserve the original gateway URL as much as possible
+	endpoint, err := url.Parse(c.GatewayURL.String())
+	if err != nil {
+		return nil, err
+	}
+	endpoint.Path = gopath.Join(endpoint.Path, u.Path)
+	endpoint.RawQuery = u.RawQuery
 
-	req, err := http.NewRequest(method, url.String(), body)
+	req, err := http.NewRequest(method, endpoint.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -81,6 +90,14 @@ func (c *Client) newRequest(method, path string, body io.Reader) (*http.Request,
 //doRequest perform an HTTP request with context
 func (c *Client) doRequest(ctx context.Context, req *http.Request) (*http.Response, error) {
 	req = req.WithContext(ctx)
+
+	if val, ok := os.LookupEnv("OPENFAAS_DUMP_HTTP"); ok && val == "true" {
+		dump, err := httputil.DumpRequest(req, true)
+		if err != nil {
+			return nil, err
+		}
+		fmt.Println(string(dump))
+	}
 	resp, err := c.httpClient.Do(req)
 
 	if err != nil {

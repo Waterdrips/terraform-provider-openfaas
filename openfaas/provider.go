@@ -44,9 +44,8 @@ func Provider() terraform.ResourceProvider {
 
 			"password": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				Sensitive:   true,
-				Default:     "",
 				Description: "OpenFaaS gateway password",
 			},
 		},
@@ -71,7 +70,11 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	auth := newAuthChain(username, password, "", gatewayURI)
 	insecure := d.Get("tls_insecure").(bool)
 	transport := GetDefaultCLITransport(insecure, &defaultTimeout)
-	client := proxy.NewClient(auth, gatewayURI, transport, &defaultTimeout)
+	client, err := proxy.NewClient(auth, gatewayURI, transport, &defaultTimeout)
+
+	if err != nil {
+		return nil, err
+	}
 
 	providerConfig := Config{
 		Client: client,

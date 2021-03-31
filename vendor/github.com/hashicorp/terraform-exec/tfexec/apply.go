@@ -91,7 +91,7 @@ func (tf *Terraform) Apply(ctx context.Context, opts ...ApplyOption) error {
 	if err != nil {
 		return err
 	}
-	return tf.runTerraformCmd(ctx, cmd)
+	return tf.runTerraformCmd(cmd)
 }
 
 func (tf *Terraform) applyCmd(ctx context.Context, opts ...ApplyOption) (*exec.Cmd, error) {
