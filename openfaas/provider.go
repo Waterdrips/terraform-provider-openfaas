@@ -52,10 +52,12 @@ func Provider() terraform.ResourceProvider {
 
 		DataSourcesMap: map[string]*schema.Resource{
 			"openfaas_function": dataSourceOpenFaaSFunction(),
+			"openfaas_secret":   dataSourceOpenFaaSSecret(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
 			"openfaas_function": resourceOpenFaaSFunction(),
+			"openfaas_secret":   resourceOpenFaaSSecret(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

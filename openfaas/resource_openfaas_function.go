@@ -24,6 +24,11 @@ func resourceOpenFaaSFunction() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"namespace": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "openfaas-fn",
+			},
 			"image": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -110,6 +115,7 @@ func resourceOpenFaaSFunction() *schema.Resource {
 
 func resourceOpenFaaSFunctionCreate(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
+	namespace := d.Get("namespace").(string)
 	deploySpec := expandDeploymentSpec(d, name)
 	config := meta.(Config)
 
@@ -118,15 +124,16 @@ func resourceOpenFaaSFunctionCreate(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("error deploying function %s status code %d", name, statusCode)
 	}
 
-	d.SetId(name)
+	d.SetId(name + namespace)
 	return nil
 }
 
 func resourceOpenFaaSFunctionRead(d *schema.ResourceData, meta interface{}) error {
-	name := d.Id()
+	name := d.Get("name").(string)
+	namespace := d.Get("namespace").(string)
 	config := meta.(Config)
 
-	function, err := config.Client.GetFunctionInfo(context.Background(), name, "")
+	function, err := config.Client.GetFunctionInfo(context.Background(), name, namespace)
 
 	if err != nil {
 		if isFunctionNotFound(err) {

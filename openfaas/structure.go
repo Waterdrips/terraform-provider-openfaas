@@ -12,6 +12,7 @@ func expandDeploymentSpec(d *schema.ResourceData, name string) *proxy.DeployFunc
 		FunctionName: name,
 		Image:        d.Get("image").(string),
 		Update:       true,
+		Namespace:    d.Get("namespace").(string),
 	}
 
 	if v, ok := d.GetOk("network"); ok {
@@ -107,6 +108,7 @@ func expandStringMap(m map[string]interface{}) map[string]string {
 
 func flattenOpenFaaSFunctionResource(d *schema.ResourceData, function types.FunctionStatus) error {
 	d.Set("name", function.Name)
+	d.Set("namespace", function.Namespace)
 	d.Set("image", function.Image)
 	d.Set("f_process", function.EnvProcess)
 	d.Set("labels", pointersMapToStringList(function.Labels))
@@ -119,6 +121,14 @@ func pointersMapToStringList(pointers *map[string]string) map[string]string {
 	if pointers != nil {
 		return *pointers
 	}
+
+	return nil
+}
+
+func flattenOpenFaaSSecretResource(d *schema.ResourceData, secret types.Secret) error {
+	d.Set("name", secret.Name)
+	d.Set("namespace", secret.Namespace)
+	d.Set("value", secret.Value)
 
 	return nil
 }
