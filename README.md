@@ -1,12 +1,11 @@
 # Terraform provider for OpenFaaS
 
-[![Build Status](https://travis-ci.org/ewilde/terraform-provider-openfaas.svg?branch=master)](https://travis-ci.org/ewilde/terraform-provider-openfaas)
-
 The terraform provider for [OpenFaaS](https://www.openfaas.com/)
 
 ## Documentation
 
-Full documentation, see: https://openfaas-tfe.edwardwilde.com/docs/providers/openfaas
+Full documentation, see: // TODO
+
 
 ### Example Usage
 
@@ -29,6 +28,7 @@ resource "openfaas_function" "function_test" {
 [![image](https://user-images.githubusercontent.com/329397/45926773-920cbd80-bf1f-11e8-9b26-88dc5df0fc7e.png)](https://www.youtube.com/watch?v=sSctTy6YIlU&feature=youtu.be)
 
 ## Building and Installing
+// TODO, community providers? AH
 
 Since this isn't maintained by Hashicorp, you have to install it manually. There
 are two main ways:
@@ -64,7 +64,7 @@ make install
 ```
 
 #### Linux
-
+// TODO fix this
 Install go and dep from your favourite package manager or from source. Then:
 
 ```sh
@@ -74,29 +74,6 @@ cd terraform-provider-openfaas
 make install
 # it may take a while to download `hashicorp/terraform`. be patient.
 ```
-
-#### Windows
-
-In PowerShell, running as Administrator:
-
-```powershell
-choco install golang
-choco install dep
-choco install zip
-choco install git # for git-bash
-choco install make
-```
-
-In a shell that has Make, like Git-Bash:
-
-```sh
-mkdir -p $GOPATH/src/github.com/ewilde; cd $GOPATH/src/github.com/ewilde
-git clone https://github.com/ewilde/terraform-provider-openfaas 
-cd terraform-provider-openfaas
-make install
-# it may take a while to download `hashicorp/terraform`. be patient.
-```
-
 
 ## Developing the Provider
 
@@ -116,15 +93,5 @@ $ make testacc
 ```
 
 ## Building the documentation
-Currently a bit manual ¯\_(ツ)_/¯
 
-1. build the content
-```sh
-$ make website-build
-```
-
-2. copy build output into `gh-pages` branch of this repo
-```sh
-$ git checkout gh-pages 
-cp -r ../terraform-website/content/build/docs/providers/openfaas/ ./docs/providers/openfaas
-```
+To generate docs run `tfplugindocs` (after installation)

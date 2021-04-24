@@ -10,7 +10,7 @@ build: fmtcheck
 
 travisbuild: default
 
-localbuild: default
+localbuild: fmt default
 	mkdir -p ~/.terraform.d/plugins/terraform.openfaas.com/openfaas/openfaas/1.0.0/linux_amd64/
 	cp $(GOPATH)/bin/terraform-provider-openfaas ~/.terraform.d/plugins/terraform.openfaas.com/openfaas/openfaas/1.0.0/linux_amd64/terraform-provider-openfaas
 

@@ -44,7 +44,7 @@ func Provider() terraform.ResourceProvider {
 
 			"password": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
 				Description: "OpenFaaS gateway password",
 			},

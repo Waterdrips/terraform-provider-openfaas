@@ -22,14 +22,18 @@ func dataSourceOpenFaaSSecret() *schema.Resource {
 				Default:  "openfaas-fn",
 			},
 			"value": {
-				Type:      schema.TypeString,
-				Required:  true,
-				Sensitive: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Sensitive:        true,
+				DiffSuppressFunc: secretValueDiffFunc,
 			},
 		},
 	}
 }
 
+func secretValueDiffFunc(_, _, _ string, _ *schema.ResourceData) bool {
+	return true
+}
 func dataSourceOpenFaaSSecretRead(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
 	namespace := d.Get("namespace").(string)

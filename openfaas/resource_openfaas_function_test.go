@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/openfaas/faas-cli/proxy"
 	"github.com/openfaas/faas-provider/types"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -100,6 +102,13 @@ func testAccCheckOpenFaaSFunctionExists(n string, res *types.FunctionStatus) res
 }
 
 func testAccOpenFaaSFunctionConfig_basic(functionName string) string {
+	timeout := 1 * time.Second
+	ofClient, _ := proxy.NewClient(newAuthChain("", "", "", "http://localhost:8080"), "http://localhot:8080", GetDefaultCLITransport(true, &timeout), &timeout)
+	ofClient.CreateSecret(context.Background(), types.Secret{
+		Name:      functionName,
+		Namespace: "openfaas-fn",
+		Value:     "foo",
+	})
 	return fmt.Sprintf(`resource "openfaas_function" "function_test" {
   name      = "%s"
   image     = "functions/alpine:latest"
@@ -123,6 +132,6 @@ func testAccOpenFaaSFunctionConfig_basic(functionName string) string {
     cpu    = "200m"
   }
 
-  secrets = ["foo"]
-}`, functionName)
+  //secrets = ["%s"]
+}`, functionName, functionName)
 }

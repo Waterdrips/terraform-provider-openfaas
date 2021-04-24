@@ -92,7 +92,9 @@ func resourceOpenFaaSSecretRead(d *schema.ResourceData, meta interface{}) error 
 	}
 	for _, s := range secret {
 		if s.Name == name {
-			return flattenOpenFaaSSecretResource(d, s)
+			d.Set("name", s.Name)
+			d.Set("namespace", s.Namespace)
+			return nil
 		}
 	}
 

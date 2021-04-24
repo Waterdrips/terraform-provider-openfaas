@@ -32,14 +32,16 @@ func dataSourceOpenFaaSFunction() *schema.Resource {
 				Computed: true,
 			},
 			"labels": {
-				Type:     schema.TypeMap,
-				Optional: true,
-				Computed: true,
+				Type:             schema.TypeMap,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: labelsDiffFunc,
 			},
 			"annotations": {
-				Type:     schema.TypeMap,
-				Optional: true,
-				Computed: true,
+				Type:             schema.TypeMap,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: annotationsDiffFunc,
 			},
 		},
 	}
@@ -56,7 +58,7 @@ func dataSourceOpenFaaSFunctionRead(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("error retrieving function: %s", err)
 	}
 
-	d.SetId(function.Name + namespace)
+	d.SetId(function.Name + function.Namespace)
 
 	return flattenOpenFaaSFunctionResource(d, function)
 }
