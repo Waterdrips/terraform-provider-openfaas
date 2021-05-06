@@ -107,6 +107,7 @@ func expandStringMap(m map[string]interface{}) map[string]string {
 }
 
 func flattenOpenFaaSFunctionResource(d *schema.ResourceData, function types.FunctionStatus) error {
+	d.SetId(makeID(function.Name, function.Namespace))
 	d.Set("name", function.Name)
 	d.Set("namespace", function.Namespace)
 	d.Set("image", function.Image)
@@ -114,6 +115,19 @@ func flattenOpenFaaSFunctionResource(d *schema.ResourceData, function types.Func
 	d.Set("labels", pointersMapToStringList(function.Labels))
 	d.Set("annotations", pointersMapToStringList(function.Annotations))
 
+	if function.Limits != nil {
+		lim := flattenLimReqResource(function.Limits)
+		d.Set("limits", lim)
+	}
+
+
+
+	if function.Requests != nil {
+		req := flattenLimReqResource(function.Requests)
+		d.Set("requests", req)
+	}
+
+	d.Set("secrets", function.Secrets)
 	return nil
 }
 
@@ -131,4 +145,14 @@ func flattenOpenFaaSSecretResource(d *schema.ResourceData, secret types.Secret) 
 	d.Set("value", secret.Value)
 
 	return nil
+}
+
+func flattenLimReqResource(r *types.FunctionResources) []interface{} {
+	data := make(map[string]interface{})
+	if r != nil {
+		data["cpu"] = r.CPU
+		data["memory"] = r.Memory
+		return []interface{}{data}
+	}
+	return []interface{}{data}
 }

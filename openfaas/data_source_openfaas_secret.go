@@ -47,7 +47,7 @@ func dataSourceOpenFaaSSecretRead(d *schema.ResourceData, meta interface{}) erro
 
 	for _, s := range secrets {
 		if s.Name == name {
-			d.SetId(s.Name + s.Namespace)
+			d.SetId(makeID(s.Name, s.Namespace))
 			return flattenOpenFaaSSecretResource(d, s)
 		}
 	}

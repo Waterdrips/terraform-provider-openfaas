@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/openfaas/faas-provider/types"
 	"net/http"
+	"strings"
 )
 
 func resourceOpenFaaSSecret() *schema.Resource {
@@ -77,8 +78,21 @@ func resourceOpenFaaSSecretCreate(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf(errString)
 	}
 
-	d.SetId(name + namespace)
+	d.SetId(makeID(name, namespace))
 	return nil
+}
+
+func makeID(name string, namespace string) string {
+	return fmt.Sprintf("%s||%s", name, namespace)
+}
+
+func decodeID(id string) (string, string, error) {
+	out := strings.Split(id, "||")
+
+	if len(out) != 2 {
+		return "", "", fmt.Errorf("function or namespace contains '||' this is used as the seperator for terraform IDs, please remove this")
+	}
+	return out[0], out[1], nil
 }
 
 func resourceOpenFaaSSecretRead(d *schema.ResourceData, meta interface{}) error {

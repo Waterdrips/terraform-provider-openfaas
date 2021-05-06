@@ -20,7 +20,6 @@ func TestAccDataSourceOpenFaaSSecret_basic(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.openfaas_secret.secret_test", "name", name),
 					resource.TestCheckResourceAttr("data.openfaas_secret.secret_test", "namespace", "openfaas-fn"),
-					resource.TestCheckResourceAttr("data.openfaas_secret.secret_test", "value", "Something"),
 				),
 			},
 		},
