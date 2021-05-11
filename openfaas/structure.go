@@ -120,8 +120,6 @@ func flattenOpenFaaSFunctionResource(d *schema.ResourceData, function types.Func
 		d.Set("limits", lim)
 	}
 
-
-
 	if function.Requests != nil {
 		req := flattenLimReqResource(function.Requests)
 		d.Set("requests", req)

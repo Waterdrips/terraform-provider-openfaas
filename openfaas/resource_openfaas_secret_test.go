@@ -50,12 +50,12 @@ func testAccCheckOpenFaaSSecretDestroy(s *terraform.State) error {
 		// eugh... eventual consistency
 		var err error
 		var secrets []types.Secret
-		for i:=0; i < 15; i ++ {
+		for i := 0; i < 15; i++ {
 			secrets, err = config.Client.GetSecretList(context.Background(), namespace)
 			if err != nil {
 				break
 			}
-			time.Sleep(time.Second*1)
+			time.Sleep(time.Second * 1)
 		}
 
 		if err != nil {
@@ -72,10 +72,10 @@ func testAccCheckOpenFaaSSecretDestroy(s *terraform.State) error {
 	return nil
 }
 
-func findSecret(secrets []types.Secret, name string) (*types.Secret, bool){
+func findSecret(secrets []types.Secret, name string) (*types.Secret, bool) {
 	for _, secret := range secrets {
 		if secret.Name == name {
-			return &secret,true
+			return &secret, true
 		}
 	}
 	return nil, false
@@ -103,8 +103,6 @@ func testAccCheckOpenFaaSSecretExists(n string, res *types.Secret) resource.Test
 		if _, ok := findSecret(function, name); !ok {
 			return err
 		}
-
-
 
 		return nil
 	}

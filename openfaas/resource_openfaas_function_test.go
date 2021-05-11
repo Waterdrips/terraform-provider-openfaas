@@ -64,12 +64,12 @@ func testAccCheckOpenFaaSFunctionDestroy(s *terraform.State) error {
 
 		// eugh... eventual consistency
 		var err error
-		for i:=0; i < 15; i ++ {
+		for i := 0; i < 15; i++ {
 			_, err = config.Client.GetFunctionInfo(context.Background(), name, namespace)
 			if err != nil {
 				break
 			}
-			time.Sleep(time.Second*1)
+			time.Sleep(time.Second * 1)
 		}
 
 		if err == nil {
