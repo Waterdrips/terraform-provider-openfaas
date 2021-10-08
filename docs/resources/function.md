@@ -30,9 +30,7 @@ description: |-
 - **labels** (Map of String)
 - **limits** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--limits))
 - **namespace** (String)
-- **network** (String)
 - **read_only_root_file_system** (Map of String)
-- **registry_auth** (String)
 - **requests** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--requests))
 - **secrets** (Set of String)
 

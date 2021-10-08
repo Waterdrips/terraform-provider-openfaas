@@ -22,10 +22,33 @@ description: |-
 ### Optional
 
 - **annotations** (Map of String)
+- **constraints** (Set of String)
+- **env_vars** (Map of String)
 - **f_process** (String)
 - **id** (String) The ID of this resource.
 - **image** (String)
 - **labels** (Map of String)
+- **limits** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--limits))
 - **namespace** (String)
+- **read_only_root_file_system** (Map of String)
+- **requests** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--requests))
+- **secrets** (Set of String)
+
+<a id="nestedblock--limits"></a>
+### Nested Schema for `limits`
+
+Optional:
+
+- **cpu** (String)
+- **memory** (String)
+
+
+<a id="nestedblock--requests"></a>
+### Nested Schema for `requests`
+
+Optional:
+
+- **cpu** (String)
+- **memory** (String)
 
 
