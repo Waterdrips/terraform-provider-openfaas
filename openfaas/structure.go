@@ -15,20 +15,12 @@ func expandDeploymentSpec(d *schema.ResourceData, name string) *proxy.DeployFunc
 		Namespace:    d.Get("namespace").(string),
 	}
 
-	if v, ok := d.GetOk("network"); ok {
-		deploySpec.Network = v.(string)
-	}
-
 	if v, ok := d.GetOk("f_process"); ok {
 		deploySpec.FProcess = v.(string)
 	}
 
 	if v, ok := d.GetOk("env_vars"); ok {
 		deploySpec.EnvVars = expandStringMap(v.(map[string]interface{}))
-	}
-
-	if v, ok := d.GetOk("registry_auth"); ok {
-		deploySpec.RegistryAuth = v.(string)
 	}
 
 	if v, ok := d.GetOk("constraints"); ok {

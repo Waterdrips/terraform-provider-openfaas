@@ -13,6 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
+// Test NS
+
 // Test requires an anonymous OpenFaaS
 // deployment running on localhost:8080, with a secret foo. i.e. `faas secret create foo --from-literal baz`
 func TestAccResourceOpenFaaSSecret_basic(t *testing.T) {

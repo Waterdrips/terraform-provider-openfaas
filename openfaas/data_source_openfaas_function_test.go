@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
+// TODO, Req, limits, secret, env vars RO FS, Namespace
+
 func TestAccDataSourceOpenFaaSFunction_basic(t *testing.T) {
 	name := fmt.Sprintf("testaccopenfaasfunction-basic-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
 
