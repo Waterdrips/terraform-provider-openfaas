@@ -299,7 +299,7 @@ github.com/openfaas/faas-cli/config
 github.com/openfaas/faas-cli/proxy
 github.com/openfaas/faas-cli/schema/store/v2
 github.com/openfaas/faas-cli/stack
-# github.com/openfaas/faas-provider v0.17.3
+# github.com/openfaas/faas-provider v0.18.6
 ## explicit
 github.com/openfaas/faas-provider/httputil
 github.com/openfaas/faas-provider/logs
