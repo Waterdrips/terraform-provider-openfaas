@@ -16,13 +16,18 @@ func resourceOpenFaaSFunction() *schema.Resource {
 		Update: resourceOpenFaaSFunctionUpdate,
 		Delete: resourceOpenFaaSFunctionDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: stateImporterFunc,
 		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"namespace": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "openfaas-fn",
 			},
 			"image": {
 				Type:     schema.TypeString,
@@ -110,6 +115,7 @@ func resourceOpenFaaSFunction() *schema.Resource {
 
 func resourceOpenFaaSFunctionCreate(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
+	namespace := d.Get("namespace").(string)
 	deploySpec := expandDeploymentSpec(d, name)
 	config := meta.(Config)
 
@@ -118,15 +124,16 @@ func resourceOpenFaaSFunctionCreate(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("error deploying function %s status code %d", name, statusCode)
 	}
 
-	d.SetId(name)
+	d.SetId(makeID(name, namespace))
 	return nil
 }
 
 func resourceOpenFaaSFunctionRead(d *schema.ResourceData, meta interface{}) error {
-	name := d.Id()
+	name := d.Get("name").(string)
+	namespace := d.Get("namespace").(string)
 	config := meta.(Config)
 
-	function, err := config.Client.GetFunctionInfo(context.Background(), name, "")
+	function, err := config.Client.GetFunctionInfo(context.Background(), name, namespace)
 
 	if err != nil {
 		if isFunctionNotFound(err) {
@@ -154,9 +161,10 @@ func resourceOpenFaaSFunctionUpdate(d *schema.ResourceData, meta interface{}) er
 
 func resourceOpenFaaSFunctionDelete(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
+	namespace := d.Get("namespace").(string)
 	config := meta.(Config)
 
-	err := config.Client.DeleteFunction(context.Background(), name, "")
+	err := config.Client.DeleteFunction(context.Background(), name, namespace)
 	return err
 }
 
@@ -175,13 +183,11 @@ var defaultAnnotations = map[string]struct{}{
 	"annotations.prometheus.io.scrape": {},
 }
 
-const extraProviderLabelsCount = 3
-
 func labelsDiffFunc(k, old, new string, d *schema.ResourceData) bool {
 	return defaultFieldsDiffFunc(k, old, new, defaultLabels)
 }
 
-func annotationsDiffFunc(k, old, new string, d *schema.ResourceData) bool {
+func annotationsDiffFunc(k, old, new string, _ *schema.ResourceData) bool {
 	return defaultFieldsDiffFunc(k, old, new, defaultAnnotations)
 }
 
@@ -204,4 +210,27 @@ func defaultFieldsDiffFunc(k, old, new string, defaults map[string]struct{}) boo
 	}
 
 	return o == n
+}
+
+func stateImporterFunc(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	id := d.Id()
+	name, namespace, err := decodeID(id)
+
+	if err != nil {
+		return nil, fmt.Errorf("please format imports as [functionName]||[functionNamespace]")
+	}
+	config := meta.(Config)
+
+	function, err := config.Client.GetFunctionInfo(context.Background(), name, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	err = flattenOpenFaaSFunctionResource(d, function)
+	if err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
+
 }

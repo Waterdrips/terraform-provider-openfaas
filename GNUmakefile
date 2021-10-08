@@ -10,9 +10,9 @@ build: fmtcheck
 
 travisbuild: default
 
-localbuild: default
-	-rm -r ~/.terraform.d/plugins/terraform-provider-openfaa*
-	cp $(GOPATH)/bin/terraform-provider-openfaas ~/.terraform.d/plugins
+localbuild: fmt default
+	mkdir -p ~/.terraform.d/plugins/terraform.openfaas.com/openfaas/openfaas/0.0.1/linux_amd64/
+	cp $(GOPATH)/bin/terraform-provider-openfaas ~/.terraform.d/plugins/terraform.openfaas.com/openfaas/openfaas/1.0.0/linux_amd64/terraform-provider-openfaas
 
 sweep:
 	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."

@@ -1,0 +1,31 @@
+name: build
+
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    branches: [ '*' ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        go-version: [1.15.x, 1.16.x]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@master
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Install Tools
+        run: ./scripts/get_tools.sh
+      - name: Create Cluster
+        run: ./scripts/create_cluster.sh
+      - name: Install OpenFaaS (faas-netes)
+        run: ./arkade install openfaas --basic-auth=false
+      - name: Port-Forward
+        run: ./scripts/portforward.sh
+      - name: Test Provider
+        run: make testacc

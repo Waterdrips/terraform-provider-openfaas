@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/openfaas/faas-cli/proxy"
 	"github.com/openfaas/faas-provider/types"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -58,7 +60,17 @@ func testAccCheckOpenFaaSFunctionDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := config.Client.GetFunctionInfo(context.Background(), rs.Primary.ID, "")
+		name, namespace, _ := decodeID(rs.Primary.ID)
+
+		// eugh... eventual consistency
+		var err error
+		for i := 0; i < 15; i++ {
+			_, err = config.Client.GetFunctionInfo(context.Background(), name, namespace)
+			if err != nil {
+				break
+			}
+			time.Sleep(time.Second * 1)
+		}
 
 		if err == nil {
 			return fmt.Errorf("function %q still exists", rs.Primary.ID)
@@ -87,8 +99,8 @@ func testAccCheckOpenFaaSFunctionExists(n string, res *types.FunctionStatus) res
 		}
 
 		config := testAccProvider.Meta().(Config)
-
-		function, err := config.Client.GetFunctionInfo(context.Background(), rs.Primary.ID, "")
+		name, namespace, _ := decodeID(rs.Primary.ID)
+		function, err := config.Client.GetFunctionInfo(context.Background(), name, namespace)
 
 		if err != nil {
 			return err
@@ -100,6 +112,13 @@ func testAccCheckOpenFaaSFunctionExists(n string, res *types.FunctionStatus) res
 }
 
 func testAccOpenFaaSFunctionConfig_basic(functionName string) string {
+	timeout := 1 * time.Second
+	ofClient, _ := proxy.NewClient(newAuthChain("", "", "", "http://127.0.0.1:8080"), "http://127.0.0.1:8080", GetDefaultCLITransport(true, &timeout), &timeout)
+	ofClient.CreateSecret(context.Background(), types.Secret{
+		Name:      "foo",
+		Namespace: "openfaas-fn",
+		Value:     "foo",
+	})
 	return fmt.Sprintf(`resource "openfaas_function" "function_test" {
   name      = "%s"
   image     = "functions/alpine:latest"

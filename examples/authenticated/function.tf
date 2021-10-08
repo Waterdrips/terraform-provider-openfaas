@@ -12,8 +12,8 @@ resource "openfaas_function" "function_test" {
     cpu    = "100m"
   }
 
-  env_vars = {
-    database_name = postgresql_database.function_db.name
+  secrets = {
+    superSecret = "secret value!!"
   }
 
   annotations = {
