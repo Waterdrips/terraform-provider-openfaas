@@ -3,9 +3,8 @@
 set -e
 
 DEVENV=${OF_DEV_ENV:-kind}
-OPERATOR=${OPERATOR:-0}
 
-kubectl --context "kind-$DEVENV" rollout status deploy/gateway -n openfaas --timeout=1m
+kubectl rollout status deploy/gateway -n openfaas --timeout=1m
 
 if [ $? != 0 ];
 then
@@ -18,7 +17,7 @@ fi
 
 # quietly start portforward and put it in the background, it will not
 # print every connection handled
-kubectl --context "kind-$DEVENV" port-forward deploy/gateway -n openfaas 31112:8080 &>/dev/null & \
+kubectl port-forward deploy/gateway -n openfaas 8080:8080 &>/dev/null & \
     echo -n "$!" > "of_${DEVENV}_portforward.pid"
 
 # port-forward needs some time to start

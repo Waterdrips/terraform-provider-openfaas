@@ -2,12 +2,7 @@
 
 set -e
 
-KIND_VERSION="v0.9.0"
-# Causes a validation failure when linting due to CRDs moving to v1
-# HELM_VERSION="v3.4.0"
-HELM_VERSION="v3.0.3"
-KUBE_VERSION="v1.18.8"
-ARKADE_VERSION="0.6.21"
+ARKADE_VERSION="0.8.4"
 
 echo "Downloading arkade"
 
@@ -19,9 +14,8 @@ if [[ "$1" ]]; then
   KUBE_VERSION=$1
 fi
 
-./arkade get kind --version $KIND_VERSION
-./arkade get helm --version $HELM_VERSION
-./arkade get kubectl --version $KUBE_VERSION
+./arkade get helm
+./arkade get kubectl
 ./arkade get faas-cli
 
 sudo mv $HOME/.arkade/bin/* /usr/local/bin/

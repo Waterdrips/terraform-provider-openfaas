@@ -33,20 +33,12 @@ func resourceOpenFaaSFunction() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"network": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"f_process": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"env_vars": {
 				Type:     schema.TypeMap,
-				Optional: true,
-			},
-			"registry_auth": {
-				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"constraints": {

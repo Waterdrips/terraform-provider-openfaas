@@ -18,6 +18,8 @@ var (
 	defaultTimeout = 60 * time.Second
 )
 
+// TODO OIDC auth
+
 // Provider returns a terraform.ResourceProvider.
 func Provider() terraform.ResourceProvider {
 	log.Printf("[DEBUG] returning provider schema")

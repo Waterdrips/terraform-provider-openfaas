@@ -31,6 +31,22 @@ func dataSourceOpenFaaSFunction() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"env_vars": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
+			"constraints": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
+			"secrets": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
 			"labels": {
 				Type:             schema.TypeMap,
 				Optional:         true,
@@ -42,6 +58,44 @@ func dataSourceOpenFaaSFunction() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				DiffSuppressFunc: annotationsDiffFunc,
+			},
+			"limits": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"memory": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"cpu": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
+			"requests": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"memory": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"cpu": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
+			"read_only_root_file_system": {
+				Type:     schema.TypeMap,
+				Optional: true,
 			},
 		},
 	}

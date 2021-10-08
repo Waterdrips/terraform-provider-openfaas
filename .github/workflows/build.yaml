@@ -22,10 +22,14 @@ jobs:
       - name: Install Tools
         run: ./scripts/get_tools.sh
       - name: Create Cluster
-        run: ./scripts/create_cluster.sh
+        run: |
+          curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE=777 sh -
+          cat /etc/rancher/k3s/k3s.yaml
+          mkdir -p ~/.kube
+          cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
       - name: Install OpenFaaS (faas-netes)
         run: ./arkade install openfaas --basic-auth=false
-      - name: Port-Forward
-        run: ./scripts/portforward.sh
       - name: Test Provider
-        run: make testacc
+        run: |
+          ./scripts/portforward.sh
+          make testacc
